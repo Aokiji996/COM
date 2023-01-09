@@ -2,7 +2,7 @@
  * @Author: Aokiji996 1300833135@qq.com
  * @Date: 2022-12-05 17:12:42
  * @LastEditors: Aokiji996 1300833135@qq.com
- * @LastEditTime: 2022-12-05 22:31:27
+ * @LastEditTime: 2023-01-06 17:28:28
  * @FilePath: /COM/main.cpp
  * @Description: Using example for com library V1.0.0
  */
@@ -35,8 +35,6 @@ int main() {
     u1.USART_SEND(buf1);
     u1.USART_SEND(buf2);
     u1.USART_SEND(buf3);
-
-    while (1){}
 
     u1.USART_CLOSE();
     return 0;

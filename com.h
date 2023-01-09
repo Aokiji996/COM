@@ -20,22 +20,43 @@
 #include <string>
 #include <thread>
 #include <functional>
+#include <unordered_map>
+
+
+#define is_char      0
+#define is_int       1
+#define is_float     2
+#define is_double    3
+
+
+#define COUT_RED_START      std::cout<<"\033[1;31m";
+#define COUT_GREEN_START    std::cout<<"\033[1;32m";
+#define COUT_YELLOW_START   std::cout<<"\033[1;33m";
+#define COUT_BLUE_START     std::cout<<"\033[1;34m";
+#define COUT_PURPLE_START   std::cout<<"\033[1;35m";
+#define COUT_CYAN_START     std::cout<<"\033[1;36m";
+#define COUT_WHITE_START    std::cout<<"\033[1;37m";
+
+#define COUT_COLOR_END    std::cout <<"\033[0m";
+
 
 /* 关闭assert */
 //#define NDEBUG
 /* whether to print some information */
-#define IF_PRINT_INFORMATION  1
+#define IF_PRINT_INFORMATION  true
 /* whether to print some error information */
-#define IF_THROW_EXCEPTION    1
+#define IF_THROW_EXCEPTION    true
 
 using ReceiveCallback = std::function<void (char*,int)>;
 
 namespace com{
 
 class USART{
+    friend class frame;
+
 private:
     /* 串口名 */
-    const char *file_name = "/dev/ttyUSB0";
+    const char *file_name = "/dev/ttyUSB0"; //TODO:callback
     /* 波特率 */
     int speed = B115200;
     /* 硬件控制 */
@@ -51,13 +72,13 @@ private:
     /* 文件 */
     int fd = -1;
     /* 判断串口是否成功打开 */
-    bool if_success = 0;
+    bool if_success = true;
     /* 是否开启接收 */
-    bool receivable = true;
+    bool receivable = true; //TODO:callback
     /* 最大接收长度 */
-    unsigned int receive_Maxlength = 2048;
+    unsigned int receive_Maxlength = 2048;//TODO:callback
     /* 接收回调函数 */
-    ReceiveCallback receiveCallback;
+    ReceiveCallback receiveCallback; //TODO:rewrite the format
 public:
     /**
      * @brief 串口初始化
@@ -69,7 +90,7 @@ public:
      * @brief 支持sting，unsigned char[],char[]进行发送信息，只发送一次
      * @param write_buffer 需要发送的值
      */
-    void USART_SEND(std::string write_buffer);
+    void USART_SEND(std::string write_buffer); //TODO:rewrite the function
     void USART_SEND(unsigned char write_buffer[]);
     void USART_SEND(char write_buffer[]);
     /* 设置回调函数 */
@@ -77,7 +98,7 @@ public:
      * @brief 设置回调函数用于进行接收后的处理
      * @param receiveCallback 函数模板
      */
-    void USART_setReceiveCallback(ReceiveCallback receiveCallback);
+    void USART_setReceiveCallback(ReceiveCallback receiveCallback); //TODO:rename function
     void USART_OPEN();
     void USART_CLOSE();
     void USART_SET();
@@ -90,10 +111,10 @@ public:
 
 protected:
     /* 串口可设置对应值为如下内容，可参照INIT函数中的注释使用 */
-    std::string files_name[3] ={
+    std::string files_name[2] ={
             "/dev/ttyUSB0",
             "/dev/ttyUSB1",
-            "..."
+            //"..."
     };
     int speed_arr[7] = {
             B115200,
@@ -108,7 +129,18 @@ protected:
     int databits_arr[4] = {5, 6, 7, 8};
     int parity_arr[4] = {0, 1, 2, 3};
     int stopbits_arr[2] = {1, 2};
+
 };
 
+//TODO:1.send 2.receive 3.format
+
+class FRAME{
+private:
+    unsigned int size = 0;
+    std::unordered_map<int, int> format;
+public:
+    FRAME();
+    void FRAME_ADD_ELEMENT(int type);
+};
 
 }

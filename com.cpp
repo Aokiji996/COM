@@ -6,10 +6,15 @@ void USART::USART_OPEN() {
     this->fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
 #if IF_THROW_EXCEPTION
     if(this->fd == -1){
+        this->if_success = false;
+        COUT_RED_START
         printf(" Error! in Opening ttyUSB0 \n");
+        COUT_COLOR_END
     } else{
 #if IF_PRINT_INFORMATION
+        COUT_GREEN_START
         printf(" ttyUSB0 Opened Successfully \n");
+        COUT_COLOR_END
 #endif
     }
 #endif
@@ -17,11 +22,13 @@ void USART::USART_OPEN() {
 
 void USART::USART_CLOSE() {
     if(fd != -1){
+        close(this->fd);
 #if IF_PRINT_INFORMATION
+        COUT_BLUE_START
         printf(" +----------------------------------+\n");
         printf(" |        Serial Port Close         |\n");
         printf(" +----------------------------------+\n");
-        close(this->fd);
+        COUT_COLOR_END
 #endif
     }
 }
@@ -29,6 +36,7 @@ void USART::USART_CLOSE() {
 void USART::USART_INFORMATION() {
     assert(this->if_success);
 #if IF_PRINT_INFORMATION
+    COUT_YELLOW_START
     switch (this->speed) {
         case B115200:
             printf(" BaudRate = 115200 \n");
@@ -72,17 +80,26 @@ void USART::USART_INFORMATION() {
     }else{
         printf(" Refuse Data\n");
     }
+    COUT_COLOR_END
 #endif
 }
 
 void USART::USART_SET() {
+    if(!this->if_success){
+        return;
+    }
     /* Error Checking */
     if (tcgetattr(fd, &this->options)){
+        this->if_success = false;
 #if IF_PRINT_INFORMATION
+        COUT_RED_START
         printf(" Error in SetupsSerial !\n");
+        COUT_COLOR_END
 #endif
     }
-
+    if(!this->if_success){
+        return;
+    }
 
     /* 设置串口输入波特率和输出波特率 */
     cfsetispeed(&this->options, this->speed);
@@ -181,45 +198,57 @@ void USART::USART_SET() {
 
     /* 激活配置 */
     if(tcsetattr(this->fd, TCSANOW, &this->options) != 0){
+        this->if_success = false;
 #if IF_THROW_EXCEPTION
+        COUT_RED_START
         printf(" com set error!\n");
+        COUT_COLOR_END
 #endif
     }
-    std::thread([&]{
-        char* receiveData = new char[this->receive_Maxlength];
-        int receivedLength = 0;
-        int selectResult = -1;
+    if(!this->if_success){
+        return;
+    }
+    if(this->receivable){
+        std::thread([&]{
+            char* receiveData = new char[this->receive_Maxlength];
+            int receivedLength = 0;
+            int selectResult = -1;
 
-        while (this->receivable){
-            memset(receiveData,0,this->receive_Maxlength);
-            receivedLength = read(this->fd, receiveData, this->receive_Maxlength); /* block util data received */
-            if(receivedLength > 0){
-                if(nullptr != receiveCallback){
-                    receiveCallback(receiveData,receivedLength);
+            while (this->receivable){
+                memset(receiveData,0,this->receive_Maxlength);
+                receivedLength = read(this->fd, receiveData, this->receive_Maxlength); /* block util data received */
+                if(receivedLength > 0){
+                    if(nullptr != receiveCallback){
+                        receiveCallback(receiveData,receivedLength);
+                    }
                 }
+                receivedLength = 0;
             }
-            receivedLength = 0;
-        }
-        delete[] receiveData;
-        receiveData = nullptr;
-    }).detach();
-
-    this->if_success = 1;
+            delete[] receiveData;
+            receiveData = nullptr;
+        }).detach();
+    }
 }
 
 void USART::USART_INIT() {
 #if IF_PRINT_INFORMATION
+    COUT_BLUE_START
     printf(" +----------------------------------+\n");
     printf(" |        Serial Port Init          |\n");
     printf(" +----------------------------------+\n");
+    COUT_COLOR_END
 #endif
     this->USART_OPEN();
     this->USART_SET();
 #if IF_PRINT_INFORMATION
-    this->USART_INFORMATION();
+    if(this->if_success){
+        this->USART_INFORMATION();
+    }
+    COUT_BLUE_START
     printf(" +----------------------------------+\n");
     printf(" |        Serial Port End Init      |\n");
     printf(" +----------------------------------+\n");
+    COUT_COLOR_END
 #endif
 }
 
@@ -228,7 +257,7 @@ void USART::USART_SEND(std::string str) {
     const unsigned char* u_write_buffer = (const unsigned char*)write_buffer;
     write(this->fd, write_buffer, strlen(write_buffer));
 #if IF_PRINT_INFORMATION
-    printf(" %s\n", write_buffer);
+    //TODO:add the print function
 #endif
 }
 
@@ -236,7 +265,7 @@ void USART::USART_SEND(unsigned char u_write_buffer[]) {
     std::string str(reinterpret_cast<char*>(u_write_buffer));
     write(this->fd, u_write_buffer, str.length());
 #if IF_PRINT_INFORMATION
-    printf(" %s\n", u_write_buffer);
+    //TODO:add the print function
 #endif
 }
 
@@ -244,7 +273,7 @@ void USART::USART_SEND(char write_buffer[]){
     const unsigned char* u_write_buffer = (const unsigned char*)write_buffer;
     write(this->fd, write_buffer, strlen(write_buffer));
 #if IF_PRINT_INFORMATION
-    printf( " %s\n", write_buffer);
+    //TODO:add the print function
 #endif
 }
 
@@ -261,9 +290,16 @@ void USART::USART_SET_SPEED(int set_speed) {
     }
     if(is_legal){
         this->speed = set_speed;
+#if IF_PRINT_INFORMATION
+        COUT_GREEN_START
+        printf("set variable success!\n");
+        COUT_COLOR_END //TODO:make clearer the print information
+#endif
     } else{
 #if IF_THROW_EXCEPTION
+        COUT_RED_START
         printf("illegal variable!\n");
+        COUT_COLOR_END
 #endif
     }
 }
@@ -277,9 +313,16 @@ void USART::USART_SET_FLOW_CTRL(int set_flow_ctrl) {
     }
     if (is_legal) {
         this->flow_ctrl = set_flow_ctrl;
+#if IF_PRINT_INFORMATION
+        COUT_GREEN_START
+        printf("set variable success!\n");
+        COUT_COLOR_END
+#endif
     } else {
 #if IF_THROW_EXCEPTION
+        COUT_RED_START
         printf("illegal variable!\n");
+        COUT_COLOR_END
 #endif
     }
 }
@@ -293,9 +336,16 @@ void USART::USART_SET_DATABITS(int set_databits) {
     }
     if (is_legal) {
         this->databits = set_databits;
+#if IF_PRINT_INFORMATION
+        COUT_GREEN_START
+        printf("set variable success!\n");
+        COUT_COLOR_END
+#endif
     } else {
 #if IF_THROW_EXCEPTION
+        COUT_RED_START
         printf("illegal variable!\n");
+        COUT_COLOR_END
 #endif
     }
 }
@@ -309,9 +359,16 @@ void USART::USART_SET_PARITY(int set_parity) {
     }
     if (is_legal) {
         this->parity = set_parity;
+#if IF_PRINT_INFORMATION
+        COUT_GREEN_START
+        printf("set variable success!\n");
+        COUT_COLOR_END
+#endif
     } else {
 #if IF_THROW_EXCEPTION
+        COUT_RED_START
         printf("illegal variable!\n");
+        COUT_COLOR_END
 #endif
     }
 }
@@ -325,11 +382,51 @@ void USART::USART_SET_STOPBITS(int set_stopbits) {
     }
     if (is_legal) {
         this->stopbits = set_stopbits;
+#if IF_PRINT_INFORMATION
+        COUT_GREEN_START
+        printf("set variable success!\n");
+        COUT_COLOR_END
+#endif
     } else {
 #if IF_THROW_EXCEPTION
+        COUT_RED_START
         printf("illegal variable!\n");
+        COUT_COLOR_END
 #endif
     }
 }
+
+
+void FRAME::FRAME_ADD_ELEMENT(int type) {
+    switch(type){
+        case is_char:
+            this->format.emplace(this->size, is_char);
+            break;
+        case is_int:
+            this->format.emplace(this->size, is_int);
+            break;
+        case is_float:
+            this->format.emplace(this->size, is_float);
+            break;
+        case is_double:
+            this->format.emplace(this->size, is_double);
+            break;
+        default:
+#if IF_PRINT_INFORMATION
+            COUT_RED_START
+            printf("illegal variable!\n");
+            COUT_COLOR_END
+#endif
+            return;
+            break;
+    }
+    this->size += 1;
+#if IF_PRINT_INFORMATION
+    COUT_GREEN_START
+    printf("set variable success!\n");
+    COUT_COLOR_END
+#endif
+}
+
 
 }

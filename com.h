@@ -24,11 +24,12 @@
 #include <map>
 #include <vector>
 
+namespace com{
 
-#define is_char      0
-#define is_int       1
-#define is_float     2
-#define is_double    3
+const int is_char   = 0;
+const int is_int    = 1;
+const int is_float  = 2;
+const int is_double = 3;
 
 
 #define COUT_RED_START      std::cout<<"\033[1;31m";
@@ -49,8 +50,6 @@
 /* whether to print some error information */
 #define IF_THROW_EXCEPTION    true
 
-namespace com{
-
 
 class USART;
 class RECEIVE_DATA;
@@ -60,34 +59,82 @@ class FRAME{
     friend class USART;
     friend class RECEIVE_DATA;
 private:
+    /**
+     * @param send_data_part the frame can be divided into several parts, show how many parts they have
+     */
     int send_data_part = 0;
+    /**
+     * @param write_idnex a index to help developer to make sure the place to insert data
+     */
     int write_index = 0;
+    /**
+     * @param where to save the data to send
+     */
     char write_buffer[128];
 public:
+    /**
+     * @brief add the type that you want to use to send or receive data
+     * @param type
+     */
     void FRAME_ADD_ELEMENT(int type);
-    void FRAME_PRINT_ELEMENTS();
+    /**
+     * @brief add concrete data in order for send
+     * @param data
+     */
     void FRAME_ADD_DATA(char data);
     void FRAME_ADD_DATA(std::string data);
     void FRAME_ADD_DATA(int data);
     void FRAME_ADD_DATA(float data);
     void FRAME_ADD_DATA(double data);
+    /**
+     * @brief show the frame type
+     */
+    void FRAME_PRINT_ELEMENTS();
+    /**
+     * @brief show the data prepare to send
+     */
     void FRAME_SHOW_DATA();
+    /**
+     * @brief send data save in the write_buffer
+     * @param usart the com you want to use to send the data
+     * @param times the times you want to send, default equal to 1
+     */
     void FRAME_SEND_DATA(USART &usart, unsigned int times = 1);
-
+    /**
+     * @param send_data_size show the size of send data to help to insert the '\0'
+     */
     int send_data_size = 0;
+    /**
+     * @param format save the frame type
+     */
     std::map<int, int> format;
 };
 
 
 class RECEIVE_DATA{
 private:
-    void * receive_data[128];
+    /**
+     * @param receive_data an array where to save the data which received by com, but not this variable haven't been set successfully, so it won't be used now.
+     */
+    void *receive_data[128];
+    /**
+     * @param receive_data_size as the name you think
+     */
     int receive_data_size = 0;
 public:
+    /**
+     * @brief add the data to receive_data, don't use it now, it's being developed
+     * @param data the data pushback to the receive_data
+     */
     void RECEIVE_DATA_PUSH_VALUE(char data);
     void RECEIVE_DATA_PUSH_VALUE(int data);
     void RECEIVE_DATA_PUSH_VALUE(float data);
     void RECEIVE_DATA_PUSH_VALUE(double data);
+    /**
+     * @brief get data from receive_data, don't use it now, it's being developed
+     * @param index the index of the num you want
+     * @return a pointer you can transfer it into the type you need to read
+     */
     void *RECEIVE_DATA_GET_VAlUE(int index);
 };
 
@@ -141,7 +188,11 @@ public:
     void USART_SEND(std::string write_buffer);
     void USART_SEND(unsigned char write_buffer[]);
     void USART_SEND(char write_buffer[]);
-
+    /**
+     * @brief new send function support to send data as the frame type
+     * @param write_buff the content of the send data
+     * @param send_times send times
+     */
     void USART_SEND_FRAME(char *write_buff ,int send_times = 1);
     /**
      * @brief 设置回调函数用于进行接收后的处理
@@ -149,19 +200,70 @@ public:
      */
     void USART_SET_ReceiveCallback_Normal(Normal_ReceiveCallback normal_receiveCallback);
     void USART_SET_ReceiveCallback_Frame(Frame_ReceiveCallback frame_ReceiveCallback);
+    /**
+     * @brief open the com
+     */
     void USART_OPEN();
+    /**
+     * @brief close the com
+     */
     void USART_CLOSE();
+    /**
+     * @brief set all the settings of this com
+     */
     void USART_SET();
+    /**
+     * @brief set the name of the com to open
+     * @param str com's name
+     */
     void USART_SET_COM_NAME(std::string str);
+    /**
+     * @brief print the com information
+     */
     void USART_INFORMATION();
+    /**
+     * @brief set the baud rate
+     * @param set_speed the rate you want
+     */
     void USART_SET_SPEED(int set_speed);
+    /**
+     * @brief set the flow ctrl mode
+     * @param set_flow_ctrl the mode you want
+     */
     void USART_SET_FLOW_CTRL(int set_flow_ctrl);
+    /**
+     * @brief set the data bits
+     * @param set_databits
+     */
     void USART_SET_DATABITS(int set_databits);
+    /**
+     * @brief set the parity
+     * @param set_parity
+     */
     void USART_SET_PARITY(int set_parity);
+    /**
+     * @brief set the data bits
+     * @param set_stopbits
+     */
     void USART_SET_STOPBITS(int set_stopbits);
+    /**
+     * @brief set if you want open the receive mode
+     * @param if_receive
+     */
     void USART_SET_IF_RECEIVE(int if_receive);
+    /**
+     * @brief get the frame type to tell the com how to explain the data
+     * @param frame
+     */
     void USART_GET_FRAME(FRAME &frame);
+    /**
+     * @brief set all settings to set receive (for developer)
+     */
     void USART_SET_RECEIVE();
+    /**
+     * @brief if use the special receive mode to receive data
+     * @param if_use_frame_mode
+     */
     void USART_SET_RECEIVER_MODE(bool if_use_frame_mode);
 
 protected:

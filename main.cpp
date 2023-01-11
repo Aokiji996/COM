@@ -5,7 +5,6 @@
 
 com::USART u1;
 com::USART u2;
-//TODO: receive and send support different frame type
 
 /* set receive callback */
 void get_receive(char *data, int length, com::FRAME frame)
@@ -38,6 +37,7 @@ void get_receive(char *data, int length, com::FRAME frame)
 
 
 int main() {
+    /* 制作模板 */
     com::FRAME f;
     f.FRAME_ADD_ELEMENT(is_char);
     f.FRAME_ADD_ELEMENT(is_char);
@@ -47,6 +47,8 @@ int main() {
     f.FRAME_ADD_ELEMENT(is_char);
     f.FRAME_PRINT_ELEMENTS();
 
+
+    /* 将模板格式传递给串口 */
     u2.USART_GET_FRAME(f);
 
     f.FRAME_ADD_DATA('?');
@@ -55,14 +57,14 @@ int main() {
     f.FRAME_ADD_DATA(1.234f);
     f.FRAME_ADD_DATA(2.45f);
     f.FRAME_ADD_DATA('?');
+    f.FRAME_SEND_DATA(u1);
 
+    /* 接收数据设置 */
     std::function<void(char *, int, com::FRAME)> foo = get_receive;
     u2.USART_SET_ReceiveCallback_Frame(foo);
     u2.USART_SET_COM_NAME("/dev/ttyUSB1");
     u2.USART_SET_RECEIVER_MODE(true);
     u2.USART_INIT();
-
-
 
     while(1){
 

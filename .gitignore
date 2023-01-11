@@ -4,3 +4,5 @@ cmake-build-release
 .idea
 models
 test.cpp
+.cache
+COM

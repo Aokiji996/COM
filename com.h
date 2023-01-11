@@ -4,6 +4,7 @@
  * @version:V1.0.0
  * @description:TODO
  */
+#pragma once
 
 #include <iostream>
 #include <assert.h>
@@ -20,7 +21,8 @@
 #include <string>
 #include <thread>
 #include <functional>
-#include <unordered_map>
+#include <map>
+#include <vector>
 
 
 #define is_char      0
@@ -47,16 +49,58 @@
 /* whether to print some error information */
 #define IF_THROW_EXCEPTION    true
 
-using ReceiveCallback = std::function<void (char*,int)>;
-
 namespace com{
 
-class USART{
-    friend class frame;
 
+class USART;
+class RECEIVE_DATA;
+
+
+class FRAME{
+    friend class USART;
+    friend class RECEIVE_DATA;
+private:
+    int send_data_part = 0;
+    int write_index = 0;
+    char write_buffer[128];
+public:
+    void FRAME_ADD_ELEMENT(int type);
+    void FRAME_PRINT_ELEMENTS();
+    void FRAME_ADD_DATA(char data);
+    void FRAME_ADD_DATA(std::string data);
+    void FRAME_ADD_DATA(int data);
+    void FRAME_ADD_DATA(float data);
+    void FRAME_ADD_DATA(double data);
+    void FRAME_SHOW_DATA();
+    void FRAME_SEND_DATA(USART &usart, unsigned int times = 1);
+
+    int send_data_size = 0;
+    std::map<int, int> format;
+};
+
+
+class RECEIVE_DATA{
+private:
+    void * receive_data[128];
+    int receive_data_size = 0;
+public:
+    void RECEIVE_DATA_PUSH_VALUE(char data);
+    void RECEIVE_DATA_PUSH_VALUE(int data);
+    void RECEIVE_DATA_PUSH_VALUE(float data);
+    void RECEIVE_DATA_PUSH_VALUE(double data);
+    void *RECEIVE_DATA_GET_VAlUE(int index);
+};
+
+
+using Normal_ReceiveCallback = std::function<void (char *, int)>;
+using Frame_ReceiveCallback = std::function<void (char *, int, FRAME frame)>;
+
+
+class USART{
+    friend class FRAME;
 private:
     /* 串口名 */
-    const char *file_name = "/dev/ttyUSB0"; //TODO:callback
+    const char *file_name = "/dev/ttyUSB0";
     /* 波特率 */
     int speed = B115200;
     /* 硬件控制 */
@@ -74,48 +118,54 @@ private:
     /* 判断串口是否成功打开 */
     bool if_success = true;
     /* 是否开启接收 */
-    bool receivable = true; //TODO:callback
+    bool receivable = true;
     /* 最大接收长度 */
-    unsigned int receive_Maxlength = 2048;//TODO:callback
-    /* 接收回调函数 */
-    ReceiveCallback receiveCallback; //TODO:rewrite the format
+    unsigned int receive_Maxlength = 2048;
+    /* 普通接收回调函数 */
+    Normal_ReceiveCallback normal_receiveCallback = nullptr;
+    /* frame模式接收回调函数 */
+    Frame_ReceiveCallback frame_ReceiveCallback = nullptr;
+    /* 接收数据的数据格式 */
+    FRAME receive_frame;
+    /* 是否启用特殊接收模式 */
+    bool if_use_frame_mode = false;
 public:
     /**
      * @brief 串口初始化
      */
-    /* 串口初始化 */
-    void USART_INIT();
-    /* 发送信息 */
+     void USART_INIT();
     /**
      * @brief 支持sting，unsigned char[],char[]进行发送信息，只发送一次
      * @param write_buffer 需要发送的值
      */
-    void USART_SEND(std::string write_buffer); //TODO:rewrite the function
+    void USART_SEND(std::string write_buffer);
     void USART_SEND(unsigned char write_buffer[]);
     void USART_SEND(char write_buffer[]);
-    /* 设置回调函数 */
+
+    void USART_SEND_FRAME(char *write_buff ,int send_times = 1);
     /**
      * @brief 设置回调函数用于进行接收后的处理
      * @param receiveCallback 函数模板
      */
-    void USART_setReceiveCallback(ReceiveCallback receiveCallback); //TODO:rename function
+    void USART_SET_ReceiveCallback_Normal(Normal_ReceiveCallback normal_receiveCallback);
+    void USART_SET_ReceiveCallback_Frame(Frame_ReceiveCallback frame_ReceiveCallback);
     void USART_OPEN();
     void USART_CLOSE();
     void USART_SET();
+    void USART_SET_COM_NAME(std::string str);
     void USART_INFORMATION();
     void USART_SET_SPEED(int set_speed);
     void USART_SET_FLOW_CTRL(int set_flow_ctrl);
     void USART_SET_DATABITS(int set_databits);
     void USART_SET_PARITY(int set_parity);
     void USART_SET_STOPBITS(int set_stopbits);
+    void USART_SET_IF_RECEIVE(int if_receive);
+    void USART_GET_FRAME(FRAME &frame);
+    void USART_SET_RECEIVE();
+    void USART_SET_RECEIVER_MODE(bool if_use_frame_mode);
 
 protected:
     /* 串口可设置对应值为如下内容，可参照INIT函数中的注释使用 */
-    std::string files_name[2] ={
-            "/dev/ttyUSB0",
-            "/dev/ttyUSB1",
-            //"..."
-    };
     int speed_arr[7] = {
             B115200,
             B19200,
@@ -129,18 +179,7 @@ protected:
     int databits_arr[4] = {5, 6, 7, 8};
     int parity_arr[4] = {0, 1, 2, 3};
     int stopbits_arr[2] = {1, 2};
-
 };
 
-//TODO:1.send 2.receive 3.format
-
-class FRAME{
-private:
-    unsigned int size = 0;
-    std::unordered_map<int, int> format;
-public:
-    FRAME();
-    void FRAME_ADD_ELEMENT(int type);
-};
 
 }

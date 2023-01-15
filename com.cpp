@@ -8,12 +8,12 @@ void USART::USART_OPEN() {
     if(this->fd == -1){
         this->if_success = false;
         COUT_RED_START
-        printf(" Error! in Opening %s \n", this->file_name);
+        printf("Error! in Opening %s \n", this->file_name);
         COUT_COLOR_END
     } else{
 #if IF_PRINT_INFORMATION
         COUT_GREEN_START
-        printf(" %s Opened Successfully \n", this->file_name);
+        printf("%s Opened Successfully \n", this->file_name);
         COUT_COLOR_END
 #endif
     }
@@ -39,46 +39,46 @@ void USART::USART_INFORMATION() {
     COUT_YELLOW_START
     switch (this->speed) {
         case B115200:
-            printf(" BaudRate = 115200 \n");
+            printf("BaudRate = 115200 \n");
             break;
         case B19200:
-            printf(" BaudRate = 19200 \n");
+            printf("BaudRate = 19200 \n");
             break;
         case B9600:
-            printf(" BaudRate = 9600 \n");
+            printf("BaudRate = 9600 \n");
             break;
         case B4800:
-            printf(" BaudRate = 4800 \n");
+            printf("BaudRate = 4800 \n");
             break;
         case B2400:
-            printf(" BaudRate = 2400 \n");
+            printf("BaudRate = 2400 \n");
             break;
         case B1200:
-            printf(" BaudRate = 1200 \n");
+            printf("BaudRate = 1200 \n");
             break;
         case B300:
-            printf(" BaudRate = 300 \n");
+            printf("BaudRate = 300 \n");
             break;
     }
-    printf(" StopBits = %d \n", this->stopbits);
+    printf("StopBits = %d \n", this->stopbits);
     switch (this->parity) {
         case 0:
-            printf(" Parity = none \n");
+            printf("Parity = none \n");
             break;
         case 1:
-            printf(" Parity = odd \n");
+            printf("Parity = odd \n");
             break;
         case 2:
-            printf(" Parity = even \n");
+            printf("Parity = even \n");
             break;
         case 3:
-            printf(" Parity = space \n");
+            printf("Parity = space \n");
             break;
     }
     if(this->receivable){
-        printf(" Receive Data\n");
+        printf("Receive Data\n");
     }else{
-        printf(" Refuse Data\n");
+        printf("Refuse Data\n");
     }
     COUT_COLOR_END
 #endif
@@ -93,7 +93,7 @@ void USART::USART_SET() {
         this->if_success = false;
 #if IF_PRINT_INFORMATION
         COUT_RED_START
-        printf(" Error in SetupsSerial !\n");
+        printf("Error in SetupsSerial !\n");
         COUT_COLOR_END
 #endif
     }
@@ -187,6 +187,12 @@ void USART::USART_SET() {
     this->options.c_iflag &= ~(ICRNL | INLCR);
     this->options.c_iflag &= ~(IXON | IXOFF | IXANY);
 
+    /* 另一种配置 */
+//    this->options.c_cflag |= CLOCAL | CREAD;
+//    this->options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+//    this->options.c_oflag &= ~OPOST;
+//    this->options.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+
     /* 设置等待时间和最小接收字符 */
     /* 读取一个字符等待1*(1/10)s */
     this->options.c_cc[VTIME] = 1;
@@ -201,7 +207,7 @@ void USART::USART_SET() {
         this->if_success = false;
 #if IF_THROW_EXCEPTION
         COUT_RED_START
-        printf(" com set error!\n");
+        printf("com set error!\n");
         COUT_COLOR_END
 #endif
     }
@@ -216,9 +222,7 @@ void USART::USART_SET() {
 void USART::USART_INIT() {
 #if IF_PRINT_INFORMATION
     COUT_BLUE_START
-    printf(" +----------------------------------+\n");
-    printf(" |        Serial Port Init          |\n");
-    printf(" +----------------------------------+\n");
+    printf("Serial Port Init\n");
     COUT_COLOR_END
 #endif
     this->USART_OPEN();
@@ -227,11 +231,6 @@ void USART::USART_INIT() {
     if(this->if_success){
         this->USART_INFORMATION();
     }
-    COUT_BLUE_START
-    printf(" +----------------------------------+\n");
-    printf(" |        Serial Port End Init      |\n");
-    printf(" +----------------------------------+\n");
-    COUT_COLOR_END
 #endif
 }
 
@@ -287,7 +286,7 @@ void USART::USART_SET_SPEED(int set_speed) {
 #if IF_PRINT_INFORMATION
         COUT_GREEN_START
         printf("set speed success!\n");
-        COUT_COLOR_END //TODO:make clearer the print information
+        COUT_COLOR_END
 #endif
     } else{
 #if IF_THROW_EXCEPTION
@@ -397,41 +396,21 @@ void FRAME::FRAME_ADD_ELEMENT(int type) {
         case is_char:
             this->format.emplace(this->send_data_size, is_char);
             this->send_data_size += 1;
-#if IF_PRINT_INFORMATION
-            COUT_GREEN_START
-            printf("add char   element success!\n");
-            COUT_COLOR_END
-#endif
             break;
         case is_int:
             this->format.emplace(this->send_data_size, is_int);
             this->send_data_size += 1;
-#if IF_PRINT_INFORMATION
-            COUT_GREEN_START
-            printf("add int    element success!\n");
-            COUT_COLOR_END
-#endif
             break;
         case is_float:
             this->format.emplace(this->send_data_size, is_float);
             this->send_data_size += 4;
-#if IF_PRINT_INFORMATION
-            COUT_GREEN_START
-            printf("add float  element success!\n");
-            COUT_COLOR_END
-#endif
             break;
         case is_double:
             this->format.emplace(this->send_data_size, is_double);
             this->send_data_size += 8;
-#if IF_PRINT_INFORMATION
-            COUT_GREEN_START
-            printf("add double element success!\n");
-            COUT_COLOR_END
-#endif
             break;
         default:
-#if IF_PRINT_INFORMATION
+#if IF_THROW_EXCEPTION
             COUT_RED_START
             printf("illegal variable type!\n");
             COUT_COLOR_END
@@ -446,13 +425,13 @@ void FRAME::FRAME_PRINT_ELEMENTS() {
     for(auto iter = this->format.begin();iter != this->format.end(); ++iter){
         switch (iter->second) {
             case is_char:
-                std::cout << iter->first << '~' << iter->first + 1 << ' ' << "is char   variable" << std::endl;
+                std::cout << iter->first << '~' << iter->first << ' ' << "is char variable" << std::endl;
                 break;
             case is_int:
-                std::cout << iter->first << '~' << iter->first + 1 << ' ' << "is int    variable" << std::endl;
+                std::cout << iter->first << '~' << iter->first  << ' ' << "is int variable" << std::endl;
                 break;
             case is_float:
-                std::cout << iter->first << '~' << iter->first + 3 << ' ' << "is float  variable" << std::endl;
+                std::cout << iter->first << '~' << iter->first + 3 << ' ' << "is float variable" << std::endl;
                 break;
             case is_double:
                 std::cout << iter->first << '~' << iter->first + 7 << ' ' << "is double variable" << std::endl;
@@ -477,11 +456,6 @@ void FRAME::FRAME_ADD_DATA(char data) {
         return;
     } else{
         this->write_buffer[iter->first] = data;
-#if IF_PRINT_INFORMATION
-        COUT_GREEN_START
-        printf("add char variable success!\n");
-        COUT_COLOR_END
-#endif
     }
     this->write_index++;
     if(this->write_index == this->send_data_part){
@@ -504,11 +478,6 @@ void FRAME::FRAME_ADD_DATA(std::string data) {
         return;
     } else{
         this->write_buffer[iter->first] = data[0];
-#if IF_PRINT_INFORMATION
-        COUT_GREEN_START
-        printf("add char variable success!\n");
-        COUT_COLOR_END
-#endif
     }
     this->write_index++;
 
@@ -529,11 +498,6 @@ void FRAME::FRAME_ADD_DATA(int data) {
     } else{
         char s = std::to_string(data)[0];
         this->write_buffer[iter->first] = s;
-#if IF_PRINT_INFORMATION
-        COUT_GREEN_START
-        printf("add int variable success!\n");
-        COUT_COLOR_END
-#endif
     }
     this->write_index++;
     if(this->write_index == this->send_data_part){
@@ -561,11 +525,6 @@ void FRAME::FRAME_ADD_DATA(float data) {
         this->write_buffer[iter->first + 1] = *(p + 1);
         this->write_buffer[iter->first + 2] = *(p + 2);
         this->write_buffer[iter->first + 3] = *(p + 3);
-#if IF_PRINT_INFORMATION
-        COUT_GREEN_START
-        printf("add float variable success!\n");
-        COUT_COLOR_END
-#endif
     }
     this->write_index++;
     if(this->write_index == this->send_data_part){
@@ -597,11 +556,6 @@ void FRAME::FRAME_ADD_DATA(double data) {
         this->write_buffer[iter->first + 5] = *(p + 5);
         this->write_buffer[iter->first + 6] = *(p + 6);
         this->write_buffer[iter->first + 7] = *(p + 7);
-#if IF_PRINT_INFORMATION
-        COUT_GREEN_START
-        printf("add double variable success!\n");
-        COUT_COLOR_END
-#endif
     }
     this->write_index++;
     if(this->write_index == this->send_data_part){
@@ -634,9 +588,9 @@ void FRAME::FRAME_SHOW_DATA() {
     COUT_COLOR_END
 }
 
-void USART::USART_SEND_FRAME(char *write_buff, int send_times) {
+void USART::USART_SEND_FRAME(char *write_buff, int send_size, int send_times) {
     for(size_t i = 0; i < send_times;i++){
-        write(this->fd, write_buff, strlen(write_buff) + 1);
+        write(this->fd, write_buff, send_size);
     }
 }
 
@@ -658,7 +612,7 @@ void USART::USART_SET_IF_RECEIVE(int if_receive) {
 
 
 void FRAME::FRAME_SEND_DATA(USART &usart, unsigned int times) {
-    usart.USART_SEND_FRAME(this->write_buffer, times);
+    usart.USART_SEND_FRAME(this->write_buffer, this->send_data_size + 1,times);
 #if IF_PRINT_INFORMATION
     this->FRAME_SHOW_DATA();
 #endif
@@ -706,7 +660,6 @@ void USART::USART_SET_RECEIVE() {
                             std::cout << std::endl;
                             COUT_COLOR_END
 #endif
-                            //TODO:
                             this->frame_ReceiveCallback(receiveData, receivedLength, this->receive_frame);
                         }
                     }

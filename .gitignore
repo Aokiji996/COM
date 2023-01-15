@@ -6,3 +6,4 @@ models
 test.cpp
 .cache
 COM
+.vscode

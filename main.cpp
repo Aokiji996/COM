@@ -3,6 +3,8 @@
 
 #include "com.h"
 
+using namespace com;
+
 com::USART u1;
 com::USART u2;
 
@@ -46,7 +48,7 @@ int main() {
     f.FRAME_ADD_ELEMENT(is_float);
     f.FRAME_ADD_ELEMENT(is_char);
     f.FRAME_PRINT_ELEMENTS();
-
+    u1.USART_INIT();
 
     /* 将模板格式传递给串口 */
     u2.USART_GET_FRAME(f);
@@ -54,10 +56,17 @@ int main() {
     f.FRAME_ADD_DATA('?');
     f.FRAME_ADD_DATA('B');
     f.FRAME_ADD_DATA(1);
-    f.FRAME_ADD_DATA(1.234f);
-    f.FRAME_ADD_DATA(2.45f);
+    f.FRAME_ADD_DATA(0.f);
+    f.FRAME_ADD_DATA(0.f);
     f.FRAME_ADD_DATA('?');
     f.FRAME_SEND_DATA(u1);
+
+//    f.FRAME_ADD_DATA('!');
+//    f.FRAME_ADD_DATA('A');
+//    f.FRAME_ADD_DATA(3);
+//    f.FRAME_ADD_DATA(7.684f);
+//    f.FRAME_ADD_DATA(4.35f);
+//    f.FRAME_ADD_DATA('!');
 
     /* 接收数据设置 */
     std::function<void(char *, int, com::FRAME)> foo = get_receive;
@@ -67,7 +76,7 @@ int main() {
     u2.USART_INIT();
 
     while(1){
-
+//        f.FRAME_SEND_DATA(u1);
     }
 
     u2.USART_CLOSE();

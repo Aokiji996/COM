@@ -1,8 +1,8 @@
 /**
  * @name:COM LIBRARY
- * @author:Aokiji
- * @version:V1.0.0
- * @description:TODO
+ * @author:Aokiji996
+ * @version:V2.1.0
+ * @description:the library to solve the communication between two devices
  */
 #pragma once
 
@@ -39,8 +39,7 @@ const int is_double = 3;
 #define COUT_PURPLE_START   std::cout<<"\033[1;35m";
 #define COUT_CYAN_START     std::cout<<"\033[1;36m";
 #define COUT_WHITE_START    std::cout<<"\033[1;37m";
-
-#define COUT_COLOR_END    std::cout <<"\033[0m";
+#define COUT_COLOR_END      std::cout <<"\033[0m";
 
 
 /* 关闭assert */
@@ -193,7 +192,7 @@ public:
      * @param write_buff the content of the send data
      * @param send_times send times
      */
-    void USART_SEND_FRAME(char *write_buff ,int send_times = 1);
+    void USART_SEND_FRAME(char *write_buff ,int send_size, int send_times = 1);
     /**
      * @brief 设置回调函数用于进行接收后的处理
      * @param receiveCallback 函数模板
